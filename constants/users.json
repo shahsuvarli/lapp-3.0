@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "email": "elnur.mammadov@lapp.com",
+    "password": "Elnur123",
+    "name": "Elnur Mammadov",
+    "image": "https://avatars.githubusercontent.com/u/48007415?",
+    "position": "Business System Analyst"
+  },
+  {
+    "id": 2,
+    "email": "elvin.shahsuvarli@lapp.com",
+    "password": "Elvin123",
+    "name": "Elvin Shahsuvarli",
+    "image": "https://avatars.githubusercontent.com/u/46631807?",
+    "position": "Senior Software Engineer"
+  }
+]
