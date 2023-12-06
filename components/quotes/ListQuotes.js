@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Formik, Form, Field, useFormik } from "formik";
 import axios from "axios";
 import AllQuotesTable from "./AllQuotesTable";
+import { enqueueSnackbar } from "notistack";
 
 function ListQuotes({
   defaultQuotes,
@@ -21,11 +22,14 @@ function ListQuotes({
 
   const handleSearch = async () => {
     try {
-      const response = await axios.post("/api/quote/search/", formik.values);
+      const {
+        data: { data, message },
+      } = await axios.post("/api/quote/search/", formik.values);
 
-      setQuotes(response.data);
-    } catch (error) {
-      throw new Error(error);
+      setQuotes(data);
+      enqueueSnackbar(message, { variant: "success" });
+    } catch ({ message }) {
+      enqueueSnackbar(message, { variant: "error" });
     }
   };
 
