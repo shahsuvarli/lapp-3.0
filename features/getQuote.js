@@ -37,7 +37,10 @@ export default async function getQuote(id) {
 
   const materials = await request.query(
     `
-      select * from material_quoted
+    select material_quoted.*, material_sales_org.uom, material.stock_6100, material.stock_6120, material.stock_6130, material.stock_6140,
+    material.description, material.product_family, material_sales_org.level_5_base_cu, material_sales_org.low_discount, material_sales_org.high_discount, material_sales_org.average_discount, material_sales_org.copper_weight, material_sales_org.cost_full_copper
+
+    from material_quoted
       
       left join material on material.material_id=material_quoted.material_id
       left join material_sales_org on material_sales_org.material_id=material.material_id

@@ -11,6 +11,7 @@ export default async function Quote({ params }) {
     dsm,
     customer,
   } = await getQuote(params.id);
+
   return (
     <QuoteContainer
       quote={quote}

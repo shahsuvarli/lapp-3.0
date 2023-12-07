@@ -409,46 +409,29 @@ function MaterialsTable({ materials, quote, customer }) {
                 >
                   <td>{item.material_id}</td>
                   <td>{item.quantity}</td>
-                  <td>{item.Material.Material_Sales_Org[0]?.uom}</td>
-                  <td>{item.Material.stock_6100}</td>
-                  <td>{item.Material.stock_6120}</td>
-                  <td>{item.Material.stock_6130}</td>
-                  <td>{item.Material.stock_6140}</td>
+                  <td>{item.uom}</td>
+                  <td>{item.stock_6100}</td>
+                  <td>{item.stock_6120}</td>
+                  <td>{item.stock_6130}</td>
+                  <td>{item.stock_6140}</td>
 
                   <td>
-                    {numeral(
-                      item.Material.Material_Sales_Org[0]?.low_discount
-                    ).format("0,0.00")}
-                    %
+                    {numeral(item.low_discount).format("0,0.00")}%
                   </td>
-                  <td>
-                    {numeral(
-                      item.Material.Material_Sales_Org[0]?.average_discount
-                    ).format("0,0.00")}
-                    %
-                  </td>
-                  <td>
-                    {numeral(
-                      item.Material.Material_Sales_Org[0]?.high_discount
-                    ).format("0,0.00")}
-                    %
-                  </td>
+                  <td>{numeral(item.average_discount).format("0,0.00")}%</td>
+                  <td>{numeral(item.high_discount).format("0,0.00")}%</td>
                   <td className="w-40 break-words overflow-scroll text-ellipsis border-b-0 h-[4em] border-l-0 border-r-0 line-clamp-3">
                     {item.line_notes}
                   </td>
-                  <td>
-                    {numeral(
-                      item.Material.Material_Sales_Org[0]?.level_5_base_cu
-                    ).format("$0,0.00")}
-                  </td>
+                  <td>{numeral(item.level_5_base_cu).format("$0,0.00")}</td>
                   <td>{numeral(item.discount_percent).format("0,0.00")}%</td>
                   <td>{numeral(item.copper_base_price).format("$0,0.00")}</td>
                   <td>{numeral(item.full_base_price).format("$0,0.00")}</td>
                   <td>{item.margin_full_copper}%</td>
                   <td>{numeral(item.line_value).format("$0,0.00")}</td>
                   <td>{numeral(item.line_cogs).format("$0,0.00")}</td>
-                  <td>{item.Material.description}</td>
-                  <td>{item.Material.product_family}</td>
+                  <td>{item.description}</td>
+                  <td>{item.product_family}</td>
                 </tr>
               ))}
             </tbody>

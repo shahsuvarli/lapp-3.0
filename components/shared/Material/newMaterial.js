@@ -11,6 +11,7 @@ import { IoDuplicate } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import { formFields } from "@/utils/materialInputs";
 import axios from "axios";
+import { enqueueSnackbar } from "notistack";
 
 function NewMaterial({ quote }) {
   const [discountType, setDiscountType] = useState(null);
@@ -89,7 +90,7 @@ function NewMaterial({ quote }) {
 
       router.refresh();
       formik.setValues({ rows: [blankData] });
-      dispatch(newMaterialWindow(false))
+      dispatch(newMaterialWindow(false));
     } catch (error) {
       throw new Error(error);
     }
@@ -97,14 +98,14 @@ function NewMaterial({ quote }) {
 
   const callMaterials = async () => {
     try {
-      const response = await axios.post(
-        `/api/material/new/pull/`,
-        formik.values.rows
-      );
+      const {
+        data: { data, message },
+      } = await axios.post(`/api/material/new/pull/`, formik.values.rows);
 
-      formik.setValues(() => ({ rows: response.data }));
+      formik.setValues(() => ({ rows: data }));
+      enqueueSnackbar(message, { variant: "success" });
     } catch (error) {
-      throw new Error(error);
+      enqueueSnackbar("Failed to add new materials!", { variant: "error" });
     }
   };
 
@@ -373,6 +374,11 @@ function NewMaterial({ quote }) {
                                 }}
                                 onWheel={(event) => {
                                   event.target.blur();
+                                }}
+                                style={{
+                                  border: formik.errors.rows?.at(index)?.uom
+                                    ? "1px solid red"
+                                    : "1px solid #e0dbd4",
                                 }}
                               />
                             </td>

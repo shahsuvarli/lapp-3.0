@@ -10,6 +10,7 @@ import { IoDuplicate } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { formFields } from "@/utils/materialInputs";
+import { enqueueSnackbar } from "notistack";
 
 function Material({ quote, material }) {
   const [discountType, setDiscountType] = useState(null);
@@ -28,19 +29,23 @@ function Material({ quote, material }) {
   React.useEffect(() => {
     const fetchMaterial = async () => {
       try {
-        const response = await axios.post(`/api/material/edit/get`, {
+        const {
+          data: { data, message },
+        } = await axios.post(`/api/material/edit/get`, {
           quote_id: quote.quote_id,
-          version: quote.quote_version,
+          quote_version: quote.quote_version,
         });
 
-        formik.setValues({ rows: [...response.data] });
-      } catch (error) {
-        throw new Error(error);
+        formik.setValues({ rows: [...data] });
+        enqueueSnackbar(message, { variant: "success" });
+      } catch ({ message }) {
+        enqueueSnackbar(message, { variant: "error" });
       }
     };
 
     fetchMaterial();
   }, [material]);
+
   const router = useRouter();
   const blankData = {
     id: 0,
@@ -94,15 +99,20 @@ function Material({ quote, material }) {
 
   const handleUpdate = async () => {
     try {
-      await axios.post(`/api/material/edit/update/`, {
+      const {
+        data: { message },
+      } = await axios.post(`/api/material/edit/update/`, {
         values: formik.values.rows,
         quote,
       });
 
       router.refresh();
       dispatch(materialWindow(false));
+      enqueueSnackbar(message, { variant: "success" });
     } catch (error) {
-      throw new Error(error);
+      enqueueSnackbar("Failed to update the material list!", {
+        variant: "error",
+      });
     }
   };
 
