@@ -19,7 +19,6 @@ function ListQuotes({
   const [states, setStates] = useState([]);
   const [regions, setRegions] = useState([]);
   const [quotes, setQuotes] = React.useState([...defaultQuotes]);
-  console.log(defaultQuotes, 'data')
 
   const handleSearch = async () => {
     try {

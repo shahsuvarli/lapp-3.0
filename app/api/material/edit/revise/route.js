@@ -12,8 +12,6 @@ export async function POST(req) {
         sap_customer_id,
         created_by,
         modified_by,
-        created_date,
-        modified_date,
         account_manager_id,
         dsm_id,
         copper_rate,

@@ -42,7 +42,6 @@ export async function POST(req) {
       message: "Project updated successfully!",
     });
   } catch (error) {
-    console.log(error);
     return NextResponse.json({
       message: "Project failed to update!",
     });
