@@ -70,8 +70,6 @@ export async function POST(req) {
 
       UPDATE quote SET quote_value=@value, quote_cost=@cost, quote_margin=@margin WHERE id=${id}
 
-
-
       DECLARE @project_margin float, @project_value float, @project_cost float;
 
         WITH

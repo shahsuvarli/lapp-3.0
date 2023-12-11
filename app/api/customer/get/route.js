@@ -1,4 +1,3 @@
-import { prisma } from "@/utils/_prisma";
 import { connection } from "@/utils/db";
 import { NextResponse } from "next/server";
 

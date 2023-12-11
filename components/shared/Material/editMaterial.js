@@ -118,13 +118,16 @@ function Material({ quote, material }) {
 
   const handleRevise = async () => {
     try {
-      const response = await axios.post(`/api/material/edit/revise`, {
+      const {
+        data: { data, message },
+      } = await axios.post(`/api/material/edit/revise`, {
         values: formik.values.rows,
         quote,
       });
 
-      router.push(`/projects/list/${quote.project_id}/${response.data}`);
+      router.push(`/projects/list/${quote.project_id}/${data}`);
       handleWindow();
+      enqueueSnackbar(message, {variant:'success'})
       router.refresh();
     } catch (error) {
       throw new Error(error);

@@ -123,14 +123,14 @@ function QuotesTable({ quotes, project, customer }) {
             </select>
           </div>
 
-          {/* <Stack spacing={2}>
+          <Stack spacing={2}>
             <Pagination
               count={Math.ceil(quotes.length / step)}
               showFirstButton
               showLastButton
               onChange={handleStepCount}
             />
-          </Stack> */}
+          </Stack>
         </div>
       </div>
     </React.Fragment>
