@@ -125,8 +125,8 @@ function NewMaterial({ quote }) {
             formik.setValues({ rows: [blankData] });
             handleWindow();
             enqueueSnackbar(message, { variant: "success" });
-          } catch (error) {
-            throw new Error(error);
+          } catch ({ message }) {
+            enqueueSnackbar(message, { variant: "error" });
           }
         }, 1000);
       } else {

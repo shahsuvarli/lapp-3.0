@@ -21,8 +21,6 @@ export async function POST(req) {
       },
     } = await req.json();
 
-    console.log(values, 'valuae')
-
     const newDataArray = values.map((item) => {
       return {
         material_id: item.material_id,
@@ -74,6 +72,12 @@ export async function POST(req) {
         notes ? `'${notes}'` : null
       }, getdate(), getdate())
 
+    INSERT INTO material_quoted(material_id, quantity, line_notes, discount_percent, copper_base_price, full_base_price, margin_full_copper, line_value, line_cogs, permanent_quote_id, quote_version)
+
+    SELECT material_id, quantity, line_notes, discount_percent, copper_base_price, full_base_price, margin_full_copper, line_value, line_cogs, permanent_quote_id, @new_quote_version FROM material_quoted
+    
+    WHERE permanent_quote_id=${quote_id} and quote_version=${quote_version} and is_active=1
+
     SELECT @inserted_id=col FROM @temp_table
 
     DECLARE @table_of_ids TABLE (col INT)
@@ -87,12 +91,6 @@ export async function POST(req) {
       VALUES ${new_values}`
         : ""
     }
-
-    INSERT INTO material_quoted(material_id, quantity, line_notes, discount_percent, copper_base_price, full_base_price, margin_full_copper, line_value, line_cogs, permanent_quote_id, quote_version)
-
-    SELECT material_id, quantity, line_notes, discount_percent, copper_base_price, full_base_price, margin_full_copper, line_value, line_cogs, permanent_quote_id, @new_quote_version FROM material_quoted
-    
-    WHERE permanent_quote_id=${quote_id} and quote_version=${quote_version} and is_active=1
 
       UPDATE material_quoted SET quote_version=@new_quote_version WHERE id IN (SELECT col FROM @table_of_ids)
 
@@ -137,6 +135,8 @@ export async function POST(req) {
       message: "Material list revised to new quote version!",
     });
   } catch (error) {
-    throw new Error(error);
+    return NextResponse.json({
+      message: "Failed to add and revise a new quote version",
+    });
   }
 }
