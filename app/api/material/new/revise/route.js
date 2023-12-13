@@ -1,13 +1,29 @@
-import { prisma } from "@/utils/_prisma";
+import { connection } from "@/utils/db";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const data = await req.json();
-    const newMaterials = data.values;
-    const quote = data.quote;
+    const {
+      values,
+      quote: {
+        id,
+        quote_id,
+        project_id,
+        sap_quote_id,
+        sap_customer_id,
+        created_by,
+        modified_by,
+        account_manager_id,
+        dsm_id,
+        copper_rate,
+        notes,
+        quote_version,
+      },
+    } = await req.json();
 
-    const newDataArray = newMaterials.map((item) => {
+    console.log(values, 'valuae')
+
+    const newDataArray = values.map((item) => {
       return {
         material_id: item.material_id,
         quantity: item.quantity,
@@ -18,135 +34,108 @@ export async function POST(req) {
         margin_full_copper: item.margin_full_copper || null,
         line_value: item.line_value || null,
         line_cogs: item.line_cogs || null,
-        permanent_quote_id: quote.quote_id,
-        quote_version: quote.quote_version,
+        permanent_quote_id: quote_id,
+        quote_version: quote_version,
       };
     });
 
-    // get the most recent quote
-    const mostRecentQuote = await prisma.quote.findFirst({
-      where: { quote_id: Number(quote.quote_id) },
-      orderBy: { quote_version: "desc" },
+    const formattedArray = newDataArray.map(
+      (quote) =>
+        `('${quote.material_id}', ${quote.quantity}, ${
+          quote.line_notes ? `'${quote.line_notes}'` : null
+        }, ${quote.discount_percent}, ${quote.copper_base_price}, ${
+          quote.full_base_price
+        }, ${quote.margin_full_copper}, ${quote.line_value}, ${
+          quote.line_cogs
+        }, ${quote.permanent_quote_id}, ${quote.quote_version})`
+    );
+    const new_values = formattedArray.join(",");
+
+    const request = connection.request();
+
+    const result = await request.query(
+      `
+    DECLARE @new_quote_version INT
+
+    SELECT TOP 1 @new_quote_version=quote_version + 1 FROM quote WHERE quote_id=${quote_id} ORDER BY quote_version DESC
+
+    DECLARE @temp_table TABLE (col INT)
+    DECLARE @inserted_id INT
+
+    INSERT INTO quote(quote_id, quote_version, project_id, sap_quote_id, sap_customer_id, created_by, modified_by, account_manager_id, dsm_id, copper_rate, notes, created_date, modified_date)
+
+    OUTPUT Inserted.id INTO @temp_table
+
+    VALUES(${quote_id}, @new_quote_version, ${project_id}, ${
+        sap_quote_id || null
+      }, ${sap_customer_id}, ${created_by}, ${modified_by}, ${
+        account_manager_id || null
+      }, ${dsm_id || null}, ${copper_rate}, ${
+        notes ? `'${notes}'` : null
+      }, getdate(), getdate())
+
+    SELECT @inserted_id=col FROM @temp_table
+
+    DECLARE @table_of_ids TABLE (col INT)
+
+    ${
+      newDataArray.length
+        ? `INSERT INTO material_quoted(material_id, quantity, line_notes, discount_percent, copper_base_price, full_base_price, margin_full_copper, line_value, line_cogs, permanent_quote_id, quote_version)
+
+      OUTPUT Inserted.id INTO @table_of_ids
+
+      VALUES ${new_values}`
+        : ""
+    }
+
+    INSERT INTO material_quoted(material_id, quantity, line_notes, discount_percent, copper_base_price, full_base_price, margin_full_copper, line_value, line_cogs, permanent_quote_id, quote_version)
+
+    SELECT material_id, quantity, line_notes, discount_percent, copper_base_price, full_base_price, margin_full_copper, line_value, line_cogs, permanent_quote_id, @new_quote_version FROM material_quoted
+    
+    WHERE permanent_quote_id=${quote_id} and quote_version=${quote_version} and is_active=1
+
+      UPDATE material_quoted SET quote_version=@new_quote_version WHERE id IN (SELECT col FROM @table_of_ids)
+
+      DECLARE @margin float, @value float, @cost float;
+
+      WITH
+          RankedRows
+          AS
+          (
+              SELECT line_value, discount_percent, line_cogs, ROW_NUMBER() OVER (PARTITION BY id order by id desc) AS VersionRank
+              FROM material_quoted
+              WHERE is_active=1 AND permanent_quote_id=${quote_id} AND quote_version=@new_quote_version
+          )
+      SELECT @margin=avg(coalesce(discount_percent, 0)), @value=sum(line_value), @cost=sum(line_cogs)
+      FROM RankedRows
+      WHERE VersionRank = 1
+ 
+      UPDATE quote SET quote_value=@value, quote_cost=@cost, quote_margin=@margin WHERE id=@inserted_id
+
+      DECLARE @project_margin float, @project_value float, @project_cost float;
+ 
+      WITH
+          RankedRows
+          AS
+          (
+              SELECT quote_value, quote_margin, quote_cost, ROW_NUMBER() OVER (PARTITION BY quote_id ORDER BY quote_version DESC) AS VersionRank
+              FROM quote
+              WHERE is_active=1 AND project_id=${project_id}
+          )
+      SELECT @project_margin=avg(coalesce(quote_margin, 0)), @project_value=sum(quote_value), @project_cost=sum(quote_cost)
+      FROM RankedRows
+      WHERE VersionRank = 1
+
+      UPDATE project SET total_value=@project_value, total_cost=@project_cost, total_margin=@project_margin WHERE project_id=${project_id}
+
+      SELECT TOP 1 col FROM @temp_table
+      `
+    );
+
+    return NextResponse.json({
+      data: result.recordset[0].col,
+      message: "Material list revised to new quote version!",
     });
-
-    // get the most recent quote version and increase it by 1
-    const newlyCreatedVersion = Number(mostRecentQuote.quote_version) + 1;
-
-    // replace with current quote data
-    const {
-      quote_id,
-      project_id,
-      sap_quote_id,
-      sap_customer_id,
-      created_by,
-      modified_by,
-      created_date,
-      modified_date,
-      account_manager_id,
-      dsm_id,
-      copper_rate,
-      notes,
-    } = quote;
-
-    const newQuoteData = {
-      quote_id,
-      project_id,
-      sap_quote_id,
-      sap_customer_id,
-      quote_version: newlyCreatedVersion,
-      created_by,
-      modified_by,
-      created_date,
-      modified_date,
-      account_manager_id,
-      dsm_id,
-      copper_rate,
-      notes,
-    };
-
-    // create quote with new version
-    const newQuote = await prisma.quote.create({
-      data: newQuoteData,
-    });
-
-    // get material_quoted data with current version
-    const quoteMaterials = await prisma.material_Quoted.findMany({
-      where: {
-        permanent_quote_id: Number(quote.quote_id),
-        quote_version: Number(quote.quote_version),
-        is_active: true,
-      },
-    });
-
-    // combine with newly added data
-    const combinedMaterialsQuoted = [...quoteMaterials, ...newDataArray];
-
-    // announce variables to use later
-    let value = 0,
-      cogs = 0,
-      margin = 0;
-
-    // update all versions to the new one
-    const updatedMaterials = combinedMaterialsQuoted.map((item) => {
-      value = Number(item.line_value) + value;
-      cogs = Number(item.line_cogs) + cogs;
-      margin = Number(item.discount_percent) + margin;
-
-      const { id, is_manual_overwrite, quote_version, ...rest } = item;
-      return {
-        ...rest,
-        quote_version: newQuote.quote_version,
-      };
-    });
-
-    margin = margin / updatedMaterials.length;
-
-    // update the quote with new value, cost, margin values
-    await prisma.quote.update({
-      where: { id: Number(newQuote.id) },
-      data: { quote_value: value, quote_cost: cogs, quote_margin: margin },
-    });
-
-    // create many updated materials
-    await prisma.material_Quoted.createMany({
-      data: updatedMaterials,
-    });
-
-    const distinctQuotes = await prisma.quote.findMany({
-      where: { project_id: Number(quote.project_id), is_active: true },
-      distinct: ["quote_id"],
-      orderBy: [
-        {
-          quote_id: "desc",
-        },
-        {
-          quote_version: "desc",
-        },
-      ],
-    });
-
-    let project_value = 0,
-      project_cogs = 0,
-      project_margin = 0;
-
-    distinctQuotes.map(({ quote_value, quote_cost, quote_margin }) => {
-      project_value = Number(quote_value) + project_value;
-      project_cogs = Number(quote_cost) + project_cogs;
-      project_margin = Number(quote_margin) + project_margin;
-    });
-
-    project_margin = project_margin / distinctQuotes.length;
-
-    await prisma.project.update({
-      where: { project_id: Number(quote.project_id) },
-      data: {
-        total_value: project_value,
-        total_cost: project_cogs,
-        total_margin: project_margin,
-      },
-    });
-
-    return NextResponse.json(newQuote);
   } catch (error) {
     throw new Error(error);
   }

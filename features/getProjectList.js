@@ -5,7 +5,7 @@ export default async function getProjectList() {
   const projects = await request.query(
     `SELECT top 10
     pr.*, so.sales_org, re.region_name, ch.channel_name, vm.vertical_market_name, st.state_long_name, em_cr.name cr_name, em_cr.surname cr_surname, em_mo.name mo_name, em_mo.surname mo_surname
-from project as pr
+FROM project AS pr
     LEFT JOIN sales_org so ON pr.sales_org_id=so.sales_org_id
     LEFT JOIN region re ON pr.region=re.region_id
     LEFT JOIN channel ch ON pr.channel=ch.channel_id

@@ -31,7 +31,7 @@ export async function POST(req) {
       line_value: item.line_value || null,
       line_cogs: item.line_cogs || null,
       permanent_quote_id: quote_id,
-      quote_version: quote_version,
+      quote_version,
     }));
 
     const formattedArray = newDataArray.map(
@@ -61,7 +61,11 @@ export async function POST(req) {
 
       output inserted.id into @temp_table
 
-      values(${quote_id}, @new_quote_version, ${project_id}, ${sap_quote_id}, ${sap_customer_id}, ${created_by}, ${modified_by}, ${account_manager_id}, ${dsm_id}, ${copper_rate}, ${
+      values(${quote_id}, @new_quote_version, ${project_id}, ${
+        sap_quote_id || null
+      }, ${sap_customer_id}, ${created_by}, ${modified_by},  ${
+        account_manager_id || null
+      },  ${dsm_id || null}, ${copper_rate}, ${
         notes ? `'${notes}'` : null
       }, getdate(), getdate())
 

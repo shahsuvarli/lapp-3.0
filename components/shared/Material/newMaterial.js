@@ -114,17 +114,17 @@ function NewMaterial({ quote }) {
       if (!err.rows) {
         setTimeout(async () => {
           try {
-            const response = await axios.post(`/api/material/new/revise`, {
+            const {
+              data: { data, message },
+            } = await axios.post(`/api/material/new/revise`, {
               values: formik.values.rows,
               quote,
             });
 
-            router.push(
-              `/projects/list/${quote.project_id}/${response.data.id}`
-            );
+            router.push(`/projects/list/${quote.project_id}/${data}`);
             formik.setValues({ rows: [blankData] });
             handleWindow();
-            router.refresh();
+            enqueueSnackbar(message, { variant: "success" });
           } catch (error) {
             throw new Error(error);
           }
