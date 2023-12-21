@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { formFields } from "@/utils/materialInputs";
 import axios from "axios";
 import { enqueueSnackbar } from "notistack";
+import { v4 as uuid } from "uuid";
 
 function NewMaterial({ quote }) {
   const [discountType, setDiscountType] = useState(null);
@@ -280,13 +281,28 @@ function NewMaterial({ quote }) {
         onClick={handleSafe}
       >
         <p className="text-2xl">Add New Material(s)</p>
-        <div className="overflow-y-scroll w-11/12 py-3 px-3 box-border border-[0.5px] border-solid border-[#7b7a7a4a] rounded-md h-5/6">
+        <div className="overflow-y-scroll w-11/12 py-3 px-3 box-border border-[0.5px] border-solid border-[#7b7a7a4a] rounded-md h-5/">
           <FormikProvider value={formik}>
             <Form onSubmit={formik.handleSubmit}>
               <FieldArray name="rows">
                 {(arrayHelpers) => (
                   <>
-                    <table>
+                    <table
+                      onPaste={(event) => {
+                        const data = event.clipboardData.getData("Text");
+                        const cleanedString = data.replace(/\\\\/g, "\\");
+                        const resultArray = cleanedString.split(/\r\n/);
+                        resultArray.map((elem) => {
+                          const [matId, matQu] = elem.split(/\t/);
+                          arrayHelpers.push({
+                            ...blankData,
+                            id: uuid(),
+                            material_id: matId,
+                            quantity: matQu,
+                          });
+                        });
+                      }}
+                    >
                       <thead>
                         <tr>
                           <th className="font-bold text-[#737373]">№</th>
@@ -457,7 +473,7 @@ function NewMaterial({ quote }) {
                             <td>
                               <Field
                                 type="number"
-                                id={`${index}-high_discount`}
+                                id={`${index}-hfigh_discount`}
                                 name={`rows[${index}].high_discount`}
                                 placeholder="High Discount"
                                 disabled
