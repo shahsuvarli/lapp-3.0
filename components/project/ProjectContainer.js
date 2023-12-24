@@ -86,8 +86,8 @@ function ProjectContainer({
         data: { message },
       } = await axios.post("/api/project/update", updatedValues);
       enqueueSnackbar(message, { variant: "success" });
-    } catch ({ message }) {
-      enqueueSnackbar(message, { variant: "error" });
+    } catch (error) {
+      enqueueSnackbar("Failed to update the project", { variant: "error" });
     }
 
     try {

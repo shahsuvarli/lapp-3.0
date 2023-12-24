@@ -33,8 +33,6 @@ export async function POST(req) {
       message: "Quote updated successfully!",
     });
   } catch (error) {
-    return NextResponse.json({
-      message: "Failed to update the quote!!",
-    });
+    return NextResponse.json({ error });
   }
 }

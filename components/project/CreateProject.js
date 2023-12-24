@@ -32,8 +32,8 @@ export default function CreateProject({
       });
       enqueueSnackbar(message, { variant: "success" });
       router.push("/projects/list");
-    } catch ({ message }) {
-      enqueueSnackbar(message, { variant: "error" });
+    } catch (error) {
+      enqueueSnackbar("Failed to create the project", { variant: "error" });
     }
   };
 

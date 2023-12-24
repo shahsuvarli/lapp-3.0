@@ -420,31 +420,34 @@ function QuoteContainer({
                     }}
                   />
                 </div>
-                <div
-                  className={
-                    disabled
-                      ? "[&>button]:hidden"
-                      : "flex text-base gap-5 self-end mt-3 [&>button]:w-36 [&>button]:rounded-md [&>button]:border-none [&>button]:hover:cursor-pointer justify-end w-1/2 right-0 absolute"
-                  }
+              </div>
+              <div
+                className={
+                  disabled
+                    ? "[&>button]:hidden"
+                    : "flex text-base gap-5 self-end mt-4 [&>button]:w-36 [&>button]:rounded-md [&>button]:border-none [&>button]:hover:cursor-pointer justify-end w-1/2 right-0"
+                }
+              >
+                <button
+                  className="bg-[#e4e2dd] text-[#313131] h-10"
+                  type="button"
+                  onClick={() => {
+                    handleReset();
+                    setNewCustomer(null);
+                    setDisabled(true);
+                    enqueueSnackbar("Quote update cancelled", {
+                      variant: "warning",
+                    });
+                  }}
                 >
-                  <button
-                    className="bg-[#e4e2dd] text-[#313131] h-10"
-                    type="cancel"
-                    onClick={() => {
-                      handleReset();
-                      setNewCustomer(null);
-                      setDisabled(true);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="bg-[#e7914e] text-white flex justify-center items-center gap-2 h-10"
-                    type="submit"
-                  >
-                    Save
-                  </button>
-                </div>
+                  Cancel
+                </button>
+                <button
+                  className="bg-[#e7914e] text-white flex justify-center items-center gap-2 h-10"
+                  type="submit"
+                >
+                  Save
+                </button>
               </div>
             </Form>
           )}

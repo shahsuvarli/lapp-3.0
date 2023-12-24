@@ -281,7 +281,7 @@ function NewMaterial({ quote }) {
         onClick={handleSafe}
       >
         <p className="text-2xl">Add New Material(s)</p>
-        <div className="overflow-y-scroll w-11/12 py-3 px-3 box-border border-[0.5px] border-solid border-[#7b7a7a4a] rounded-md h-5/">
+        <div className="overflow-y-scroll w-11/12 py-3 px-3 box-border border-[0.5px] border-solid border-[#7b7a7a4a] rounded-md h-5/6">
           <FormikProvider value={formik}>
             <Form onSubmit={formik.handleSubmit}>
               <FieldArray name="rows">

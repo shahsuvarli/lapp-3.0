@@ -28,9 +28,9 @@ export async function POST(req) {
       insert into project(sales_org_id, project_name, ranking, general_contractor, electrical_contractor, state, region, vertical_market, status, won_lost, channel, created_date, notes, created_by, modified_by, modified_date)
 
       values(${sales_org_id}, '${project_name}', ${ranking}, ${
-        general_contractor ? `${general_contractor}` : null
+        general_contractor ? `'${general_contractor}'` : null
       }, ${
-        electrical_contractor ? `${electrical_contractor}` : null
+        electrical_contractor ? `'${electrical_contractor}'` : null
       }, ${state}, ${region}, ${vertical_market}, '${status}', '${won_lost}', ${channel}, getdate(), ${
         notes ? `${notes}` : null
       }, ${user_id}, ${user_id}, getdate())
@@ -44,7 +44,7 @@ export async function POST(req) {
     });
   } catch (error) {
     return NextResponse.json({
-      message: "Failed to create a project!!",
+      error,
     });
   }
 }
