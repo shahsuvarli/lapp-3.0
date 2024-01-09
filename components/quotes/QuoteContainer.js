@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Formik, Form, Field } from "formik";
 import { useRouter } from "next/navigation";
 import { MdOutlineExpandLess, MdModeEditOutline } from "react-icons/md";
@@ -14,6 +14,7 @@ import MaterialsTable from "./MaterialsTable";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { enqueueSnackbar } from "notistack";
+import Marketing from "../shared/marketing";
 
 function QuoteContainer({
   quote,
@@ -26,6 +27,7 @@ function QuoteContainer({
 }) {
   const router = useRouter();
   const [disabled, setDisabled] = React.useState(true);
+  const [marketing, setMarketing] = useState(false);
   const dispatch = useDispatch();
   const { selectedCustomer } = useSelector((state) => state.crm);
   const { data: session } = useSession();
@@ -89,6 +91,7 @@ function QuoteContainer({
 
   return (
     <div className="flex flex-col gap-5 animate-[rise_1s_ease-in-out] lg:w-[calc(100%-310px)] w-full">
+      {marketing && <Marketing setMarketing={setMarketing} quote={quote} materials={materials} session={session} />}
       <div className="flex flex-col py-8 px-5 gap-8 bg-[#f7f6f3] rounded-md box-border animate-[rise_1s_ease-in-out w-full]">
         <div className="w-full flex justify-between items-center flex-row">
           <div className="flex flex-row self-start gap-5">
@@ -453,7 +456,12 @@ function QuoteContainer({
           )}
         </Formik>
       </div>
-      <MaterialsTable materials={materials} quote={quote} customer={customer} />
+      <MaterialsTable
+        setMarketing={setMarketing}
+        materials={materials}
+        quote={quote}
+        customer={customer}
+      />
     </div>
   );
 }
